@@ -1,1 +1,3 @@
-# 6-sem-labs-software-architecture-bogdan
+# Software Architecture
+
+## Developer: Bogdan Korh
