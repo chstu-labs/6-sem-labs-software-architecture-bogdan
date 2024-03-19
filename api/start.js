@@ -1,6 +1,7 @@
 //start.js
+require("dotenv").config();
 const app = require("./server.js");
 
-app.listen(3000, () => {
+app.listen(process.env.PORT, () => {
   console.log("Server start at localhost:3000/test");
 });
