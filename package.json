@@ -4,7 +4,8 @@
   "description": "Korh Bogdan",
   "main": "app.js",
   "scripts": {
-    "start": "node start.js",
+    "start": "node api/start.js",
+    "proxy": "node proxy/start.js",
     "test": "jest app.test.js"
   },
   "author": "",

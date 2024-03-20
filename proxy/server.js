@@ -8,4 +8,10 @@ app.get("/", (_req, res) => {
   });
 });
 
-app.listen(process.env.PROXY_PORT);
+app.get("/test", (_req, res) => {
+  axios.get(`${process.env.HOST}:${process.env.PORT}/test`).then((response) => {
+    res.send(response.data);
+  });
+});
+
+module.exports = app;
