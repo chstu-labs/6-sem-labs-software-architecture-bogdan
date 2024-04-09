@@ -35,9 +35,9 @@ app.get("/api/users/:id", async (req, res) => {
 
 app.post("/api/users", jsonParser, async (req, res) => {
   await connectMongoDB();
-  await insertUser(req.body);
+  const response = await insertUser(req.body);
   await closeMongoDB();
-  res.json(req.body);
+  res.json(response);
 });
 
 app.delete("/api/users/", async (req, res) => {

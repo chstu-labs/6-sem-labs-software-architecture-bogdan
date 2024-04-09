@@ -1,39 +1,33 @@
-const { MongoClient, ObjectId } = require("mongodb");
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
-const url = "mongodb://localhost:27017/";
-const mongoClient = new MongoClient(url);
+const userScheme = new Schema(
+  { name: String, age: Number },
+  { versionKey: false }
+);
+const User = mongoose.model("User", userScheme);
 
 const connectMongoDB = async () => {
   try {
-    await mongoClient.connect();
-  } catch (e) {
-    console.log(e);
-  }
-};
-
-const closeMongoDB = async () => {
-  try {
-    await mongoClient.close();
+    await mongoose.connect("mongodb://localhost:27017/usersdb", {
+      useUnifiedTopology: true,
+      useNewUrlParser: true,
+    });
+    console.log("Connected to MongoDB");
   } catch (e) {
     console.log(e);
   }
 };
 
 const insertUser = async (user) => {
-  try {
-    const db = mongoClient.db("usersdb");
-    const collection = db.collection("users");
-    await collection.insertOne(user);
-  } catch (e) {
-    console.log(e);
-  }
+  const newUser = new User(user);
+  const result = await newUser.save();
+  return result;
 };
 
 const getUser = async (id) => {
   try {
-    const db = mongoClient.db("usersdb");
-    const collection = db.collection("users");
-    return await collection.findOne({ _id: ObjectId.createFromHexString(id) });
+    return await User.findById(id);
   } catch (e) {
     console.log(e);
   }
@@ -41,9 +35,7 @@ const getUser = async (id) => {
 
 const getUsers = async () => {
   try {
-    const db = mongoClient.db("usersdb");
-    const collection = db.collection("users");
-    return await collection.find({}).toArray();
+    return await User.find({});
   } catch (e) {
     console.log(e);
   }
@@ -51,9 +43,7 @@ const getUsers = async () => {
 
 const removeUserByName = async (id) => {
   try {
-    const db = mongoClient.db("usersdb");
-    const collection = db.collection("users");
-    await collection.deleteOne({ _id: ObjectId.createFromHexString(id) });
+    await User.findByIdAndDelete(id);
   } catch (e) {
     console.log(e);
   }
@@ -61,9 +51,7 @@ const removeUserByName = async (id) => {
 
 const removeAllUsers = async () => {
   try {
-    const db = mongoClient.db("usersdb");
-    const collection = db.collection("users");
-    await collection.deleteMany({});
+    await User.deleteMany({});
   } catch (e) {
     console.log(e);
   }
@@ -71,19 +59,19 @@ const removeAllUsers = async () => {
 
 const updateUser = async (user) => {
   try {
-    const db = mongoClient.db("usersdb");
-    const collection = db.collection("users");
+    const updatedUser = await User.findByIdAndUpdate(user._id, user, {
+      new: true,
+    });
+    return updatedUser;
+  } catch (e) {
+    console.log(e);
+  }
+};
 
-    const userId = user._id;
-    delete user._id;
-
-    const response = await collection.findOneAndUpdate(
-      { _id: ObjectId.createFromHexString(userId) },
-      { $set: user },
-      { returnDocument: "after" }
-    );
-
-    return response;
+const closeMongoDB = async () => {
+  try {
+    await mongoose.connection.close();
+    console.log("MongoDB connection closed");
   } catch (e) {
     console.log(e);
   }
@@ -91,11 +79,11 @@ const updateUser = async (user) => {
 
 module.exports = {
   connectMongoDB,
-  closeMongoDB,
   insertUser,
   getUser,
   getUsers,
   removeUserByName,
   updateUser,
   removeAllUsers,
+  closeMongoDB,
 };
