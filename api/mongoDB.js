@@ -1,28 +1,39 @@
 const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+const { Schema } = mongoose;
 
-const userScheme = new Schema(
-  { name: String, age: Number },
-  { versionKey: false }
-);
-const User = mongoose.model("User", userScheme);
+const url = `mongodb://my_mongodb:27017/usersdb`;
+
+const userSchema = new Schema({
+  name: String,
+  age: Number,
+});
+
+const User = mongoose.model("User", userSchema);
 
 const connectMongoDB = async () => {
   try {
-    await mongoose.connect("mongodb://localhost:27017/usersdb", {
-      useUnifiedTopology: true,
-      useNewUrlParser: true,
-    });
-    console.log("Connected to MongoDB");
+    await mongoose.connect(url);
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+const closeMongoDB = async () => {
+  try {
+    await mongoose.connection.close();
   } catch (e) {
     console.log(e);
   }
 };
 
 const insertUser = async (user) => {
-  const newUser = new User(user);
-  const result = await newUser.save();
-  return result;
+  try {
+    const newUser = new User(user);
+    const savedUser = await newUser.save();
+    return savedUser;
+  } catch (e) {
+    console.log(e);
+  }
 };
 
 const getUser = async (id) => {
@@ -68,22 +79,13 @@ const updateUser = async (user) => {
   }
 };
 
-const closeMongoDB = async () => {
-  try {
-    await mongoose.connection.close();
-    console.log("MongoDB connection closed");
-  } catch (e) {
-    console.log(e);
-  }
-};
-
 module.exports = {
   connectMongoDB,
+  closeMongoDB,
   insertUser,
   getUser,
   getUsers,
   removeUserByName,
   updateUser,
   removeAllUsers,
-  closeMongoDB,
 };
